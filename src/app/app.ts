@@ -1,16 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Header } from './layout/header/header';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Header],
   selector: 'app-root',
   styles: [],
   template: `
-    <h1 class="text-2xl p-6">Hello, {{ title() }}!</h1>
-
+    <app-header />
     <router-outlet />
   `,
 })
-export class App {
-  protected readonly title = signal('online-shop-frontend-app');
-}
+export class App {}
