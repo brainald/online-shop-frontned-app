@@ -1,0 +1,16 @@
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  imports: [RouterOutlet],
+  selector: 'app-root',
+  styles: [],
+  template: `
+    <h1 class="bg-red-500">Hello, {{ title() }}</h1>
+
+    <router-outlet />
+  `,
+})
+export class App {
+  protected readonly title = signal('online-shop-frontend-app');
+}
