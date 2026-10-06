@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   styles: [],
   template: `
-    <h1 class="bg-red-500">Hello, {{ title() }}</h1>
+    <h1 class="text-2xl p-6">Hello, {{ title() }}!</h1>
 
     <router-outlet />
   `,
