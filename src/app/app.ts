@@ -7,8 +7,10 @@ import { Header } from './layout/header/header';
   selector: 'app-root',
   styles: [],
   template: `
-    <app-header />
-    <router-outlet />
+    <app-header class="z-10 relative" />
+    <div class="h-[calc(100%-64px)] overflow-auto">
+      <router-outlet />
+    </div>
   `,
 })
 export class App {}
