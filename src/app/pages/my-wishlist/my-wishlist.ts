@@ -1,12 +1,13 @@
+import { EmptyWishlist } from './empty-wishlist/empty-wishlist';
 import { Component, inject } from '@angular/core';
 import { BackButton } from '../../components/back-button/back-button';
 import { EcommerceStore } from '../../ecommerce-store';
 import { ProductCard } from '../../components/product-card/product-card';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { MatIconButton, MatAnchor, MatButton } from '@angular/material/button';
 
 @Component({
-  imports: [BackButton, ProductCard, MatIcon, MatIconButton],
+  imports: [BackButton, ProductCard, MatIcon, MatIconButton, MatAnchor, MatButton, EmptyWishlist],
   selector: 'app-my-wishlist',
   styles: ``,
   template: `
@@ -17,20 +18,28 @@ import { MatIconButton } from '@angular/material/button';
           <h1 class="text-2xl font-bold">My Wishlist</h1>
           <span class="text-gray-500 text-xl">{{ store.wishlistCount() }} items</span>
         </div>
+        <div class="responsive-grid">
+          @for (product of store.wishlistItems(); track product.id) {
+            <app-product-card [product]="product">
+              <button
+                class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg"
+                (click)="store.removeFromWishlist(product)"
+                matIconButton
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </app-product-card>
+          }
+        </div>
+
+        <div class="mt-8 flex justify-center">
+          <button matButton="outlined" class="danger" (click)="store.clearWishlist()">
+            Clear Wishlist
+          </button>
+        </div>
+      } @else {
+        <app-empty-wishlist />
       }
-      <div class="responsive-grid">
-        @for (product of store.wishlistItems(); track product.id) {
-          <app-product-card [product]="product">
-            <button
-              class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg"
-              (click)="store.removeFromWishlist(product)"
-              matIconButton
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          </app-product-card>
-        }
-      </div>
     </div>
   `,
 })
