@@ -6,6 +6,9 @@
 @use '@angular/material' as mat;
 @use 'tailwindcss';
 
+/* Importing @ngxpert/hot-toast base styles. */
+@use '@ngxpert/hot-toast/styles';
+
 html {
   height: 100%;
 
