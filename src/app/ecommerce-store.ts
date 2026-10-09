@@ -1468,11 +1468,45 @@ export const EcommerceStore = signalStore(
 
     setItemQuantity: ({ productId, quantity }: { productId: string; quantity: number }) => {
       const index = store.cartItems().findIndex((item) => item.product.id === productId);
-      patchState(store, ({ cartItems }) => {
-        const newCartItems = [...cartItems];
-        newCartItems[index].quantity = quantity;
+      const newCartItems = structuredClone(store.cartItems());
+      newCartItems[index].quantity = quantity;
+
+      patchState(store, () => {
         return { cartItems: newCartItems };
       });
+    },
+
+    addAllWishlistToCart: () => {
+      const newCartItems: CartItem[] = store
+        .wishlistItems()
+        .filter((wishlistItem) =>
+          store.cartItems().find((cartItem) => cartItem.product.id !== wishlistItem.id),
+        )
+        .map((newProduct) => ({ product: newProduct, quantity: 1 }));
+
+      patchState(store, ({ cartItems }) => {
+        const updateCartItems = [...cartItems, ...newCartItems];
+        return { cartItems: updateCartItems, wishlistItems: [] };
+      });
+    },
+
+    moveToWishlist: (product: Product) => {
+      patchState(store, ({ cartItems, wishlistItems }) => {
+        const updatedCart = cartItems.filter((cartItem) => cartItem.product.id !== product.id);
+
+        const isAlreadyExists = wishlistItems.some((item) => item.id === product.id);
+
+        return {
+          cartItems: updatedCart,
+          wishlistItems: isAlreadyExists ? wishlistItems : [...wishlistItems, product],
+        };
+      });
+    },
+
+    removeFromCart: (product: Product) => {
+      patchState(store, ({ cartItems }) => ({
+        cartItems: cartItems.filter((cartItem) => cartItem.product.id !== product.id),
+      }));
     },
   })),
 );
