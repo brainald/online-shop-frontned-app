@@ -22,7 +22,7 @@ import { MatIconButton, MatAnchor, MatButton } from '@angular/material/button';
           @for (product of store.wishlistItems(); track product.id) {
             <app-product-card [product]="product">
               <button
-                class="!absolute z-10 top-3 right-3 w-10 h-10 rounded-full !bg-white border-0 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg"
+                class="!absolute z-10 top-3 right-3 !bg-white shadow-md rounded-md transition-all duration-200 hover:scale-110 hover:shadow-lg"
                 (click)="store.removeFromWishlist(product)"
                 matIconButton
               >

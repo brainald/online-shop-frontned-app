@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { BackButton } from '../../components/back-button/back-button';
 import ShippingForm from './shipping-form/shipping-form';
 import PaymentForm from './payment-form/payment-form';
@@ -17,7 +17,7 @@ import { MatButton } from '@angular/material/button';
 
       <div class="grid grid-cols-l lg:grid-cols-5 gap-6">
         <div class="lg:col-span-3 flex flex-col gap-6">
-          <app-shipping-form />
+          <app-shipping-form (validityChange)="shippingFormValid.set($event)" />
           <app-payment-form />
         </div>
         <div class="lg:col-span-2">
@@ -35,7 +35,7 @@ import { MatButton } from '@angular/material/button';
                 matButton="filled"
                 class="w-full mt-6 py-3"
                 (click)="store.placeOrder()"
-                [disabled]="store.loading()"
+                [disabled]="!shippingFormValid() || store.loading()"
               >
                 {{ store.loading() ? 'Processing...' : 'Place Order' }}
               </button>
@@ -48,4 +48,5 @@ import { MatButton } from '@angular/material/button';
 })
 export default class Checkout {
   store = inject(EcommerceStore);
+  shippingFormValid = signal(false);
 }
