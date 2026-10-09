@@ -1,13 +1,13 @@
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { Component, inject } from '@angular/core';
-import { ViewPanel } from '../../directives/view-panel';
+import { ViewPanel } from '../../../directives/view-panel';
 import { MatIcon } from '@angular/material/icon';
-import { EcommerceStore } from '../../ecommerce-store';
+import { EcommerceStore } from '../../../ecommerce-store';
 
 @Component({
   imports: [ViewPanel, MatIcon, MatButton, RouterLink],
-  selector: 'app-view-cart-tease-wishlist',
+  selector: 'app-tease-wishlist',
   styles: ``,
   template: `
     <div appViewPanel class="flex items-center justify-between">
@@ -34,6 +34,6 @@ import { EcommerceStore } from '../../ecommerce-store';
     </div>
   `,
 })
-export class ViewCartTeaseWishlist {
+export class TeaseWishlist {
   store = inject(EcommerceStore);
 }
