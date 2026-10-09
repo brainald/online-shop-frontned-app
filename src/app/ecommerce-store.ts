@@ -12,7 +12,7 @@ import { Toaster } from './services/toaster';
 import { CartItem } from './models/cart';
 import { MatDialog } from '@angular/material/dialog';
 import { SignInDialog } from './components/sign-in-dialog/sign-in-dialog';
-import { SignInParams, User } from './models/user';
+import { SignInParams, SignUpParams, User } from './models/user';
 import { Router } from '@angular/router';
 
 export type EcommerceState = {
@@ -1518,7 +1518,12 @@ export const EcommerceStore = signalStore(
         }));
       },
 
-      proceedToCheckout: () => {
+      proceedToCheckout: async () => {
+        if (store.user()) {
+          await router.navigate(['/checkout']);
+          return;
+        }
+
         matDialog.open(SignInDialog, {
           disableClose: true,
           data: {
@@ -1528,6 +1533,25 @@ export const EcommerceStore = signalStore(
       },
 
       signIn: async ({ email, password, checkout, dialogId }: SignInParams) => {
+        patchState(store, {
+          user: {
+            id: '1',
+            email,
+            name: 'John Doe',
+            imageUrl: 'https://randomuser.me/api/portraits/men/36.jpg',
+          },
+        });
+        matDialog.getDialogById(dialogId)?.close();
+        if (checkout) {
+          await router.navigate(['/checkout']);
+        }
+      },
+
+      signOut: () => {
+        patchState(store, { user: undefined });
+      },
+
+      signUp: async ({ email, password, checkout, dialogId, name }: SignUpParams) => {
         patchState(store, {
           user: {
             id: '1',

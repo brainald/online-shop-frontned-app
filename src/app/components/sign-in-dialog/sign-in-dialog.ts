@@ -4,8 +4,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { MAT_DIALOG_DATA, MatDialogClose, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogClose, MatDialogRef } from '@angular/material/dialog';
 import { EcommerceStore } from '../../ecommerce-store';
+import { SignUpDialog } from '../sign-up-dialog/sign-up-dialog';
 
 @Component({
   imports: [
@@ -59,6 +60,11 @@ import { EcommerceStore } from '../../ecommerce-store';
         </mat-form-field>
         <button type="submit" matButton="filled" class="w-full">Sign In</button>
       </form>
+
+      <p class="text-sm text-gray-500 mt-2 text-center">
+        Don't have an account?
+        <a class="text-blue-600 cursor-pointer" (click)="openSignUpDialog()">Sign Up</a>
+      </p>
     </div>
   `,
 })
@@ -70,26 +76,38 @@ export class SignInDialog {
   dialogRef = inject(MatDialogRef);
 
   passwordVisible = signal(false);
+  matDialog = inject(MatDialog);
 
   signInForm = this.fb.group({
     email: ['john@test.com', Validators.required],
     password: ['test123', Validators.required],
   });
 
-  signIn() {
+  async signIn() {
     if (!this.signInForm.valid) {
       this.signInForm.markAllAsTouched();
+      return;
     }
 
     const { email, password } = this.signInForm.value;
 
     if (email && password) {
-      this.store.signIn({
+      await this.store.signIn({
         email,
         password,
-        checkout: this.data.checkout,
+        checkout: this.data?.checkout,
         dialogId: this.dialogRef.id,
       });
     }
+  }
+
+  openSignUpDialog() {
+    this.dialogRef.close();
+    this.matDialog.open(SignUpDialog, {
+      disableClose: true,
+      data: {
+        checkout: this.data?.checkout,
+      },
+    });
   }
 }
