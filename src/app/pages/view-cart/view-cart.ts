@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { BackButton } from '../../components/back-button/back-button';
 import { ListCartItems } from './list-cart-items/list-cart-items';
 import { TeaseWishlist } from './view-cart-tease-wishlist/view-cart-tease-wishlist';
-import { SummarizeOrder } from '../../components/summarize-order/summerize-order';
+import { SummarizeOrder } from '../../components/summarize-order/summarize-order';
 import { EcommerceStore } from '../../ecommerce-store';
 
 @Component({

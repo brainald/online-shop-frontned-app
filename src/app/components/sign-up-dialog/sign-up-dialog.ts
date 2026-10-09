@@ -74,7 +74,6 @@ export class SignUpDialog {
   data = inject<{ checkout: boolean }>(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
 
-  passwordVisible = signal(false);
   matDialog = inject(MatDialog);
 
   signUpForm = this.fb.group({
