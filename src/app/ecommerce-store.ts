@@ -10,12 +10,17 @@ import {
 } from '@ngrx/signals';
 import { Toaster } from './services/toaster';
 import { CartItem } from './models/cart';
+import { MatDialog } from '@angular/material/dialog';
+import { SignInDialog } from './components/sign-in-dialog/sign-in-dialog';
+import { SignInParams, User } from './models/user';
+import { Router } from '@angular/router';
 
 export type EcommerceState = {
   products: Product[];
   category: string;
   wishlistItems: Product[];
   cartItems: CartItem[];
+  user: User | undefined;
 };
 
 export const EcommerceStore = signalStore(
@@ -1406,6 +1411,7 @@ export const EcommerceStore = signalStore(
     category: 'all',
     wishlistItems: [],
     cartItems: [],
+    user: undefined,
   }),
   withComputed(({ category, products, wishlistItems, cartItems }) => ({
     filteredProducts: computed(() => {
@@ -1417,96 +1423,124 @@ export const EcommerceStore = signalStore(
 
     cartCount: computed(() => cartItems().reduce((sum, item) => item.quantity + sum, 0)),
   })),
-  withMethods((store, toaster = inject(Toaster)) => ({
-    setCategory: signalMethod((category: string) => {
-      patchState(store, { category });
-    }),
+  withMethods(
+    (store, toaster = inject(Toaster), matDialog = inject(MatDialog), router = inject(Router)) => ({
+      setCategory: signalMethod((category: string) => {
+        patchState(store, { category });
+      }),
 
-    addToWishlist: (product: Product) => {
-      patchState(store, (state) =>
-        state.wishlistItems.some((item) => item.id === product.id)
-          ? state
-          : { wishlistItems: [...state.wishlistItems, product] },
-      );
-      toaster.success(`Product added to wishlist`);
-    },
+      addToWishlist: (product: Product) => {
+        patchState(store, (state) =>
+          state.wishlistItems.some((item) => item.id === product.id)
+            ? state
+            : { wishlistItems: [...state.wishlistItems, product] },
+        );
+        toaster.success(`Product added to wishlist`);
+      },
 
-    removeFromWishlist: (product: Product) => {
-      patchState(store, (state) => ({
-        wishlistItems: state.wishlistItems.filter((item) => item.id !== product.id),
-      }));
-      toaster.success(`Product removed from wishlist`);
-    },
+      removeFromWishlist: (product: Product) => {
+        patchState(store, (state) => ({
+          wishlistItems: state.wishlistItems.filter((item) => item.id !== product.id),
+        }));
+        toaster.success(`Product removed from wishlist`);
+      },
 
-    clearWishlist: () => {
-      patchState(store, () => ({
-        wishlistItems: [],
-      }));
-    },
+      clearWishlist: () => {
+        patchState(store, () => ({
+          wishlistItems: [],
+        }));
+      },
 
-    addToCart: (product: Product, quantity = 1) => {
-      const existingItemIndex = store.cartItems().findIndex((i) => i.product.id === product.id);
+      addToCart: (product: Product, quantity = 1) => {
+        const existingItemIndex = store.cartItems().findIndex((i) => i.product.id === product.id);
 
-      patchState(store, (state) => {
-        if (existingItemIndex === -1) {
-          return { cartItems: [...state.cartItems, { product, quantity }] };
+        patchState(store, (state) => {
+          if (existingItemIndex === -1) {
+            return { cartItems: [...state.cartItems, { product, quantity }] };
+          }
+          return {
+            cartItems: state.cartItems.map((item) => {
+              if (item.product.id === product.id) {
+                return { ...item, quantity: item.quantity + quantity };
+              }
+              return item;
+            }),
+          };
+        });
+
+        toaster.success(
+          existingItemIndex !== -1
+            ? 'Product added again to the cart'
+            : 'Product added to the cart',
+        );
+      },
+
+      setItemQuantity: ({ productId, quantity }: { productId: string; quantity: number }) => {
+        const index = store.cartItems().findIndex((item) => item.product.id === productId);
+        const newCartItems = structuredClone(store.cartItems());
+        newCartItems[index].quantity = quantity;
+
+        patchState(store, () => {
+          return { cartItems: newCartItems };
+        });
+      },
+
+      addAllWishlistToCart: () => {
+        const newCartItems: CartItem[] = store
+          .wishlistItems()
+          .filter((wishlistItem) =>
+            store.cartItems().find((cartItem) => cartItem.product.id !== wishlistItem.id),
+          )
+          .map((newProduct) => ({ product: newProduct, quantity: 1 }));
+
+        patchState(store, ({ cartItems }) => {
+          const updateCartItems = [...cartItems, ...newCartItems];
+          return { cartItems: updateCartItems, wishlistItems: [] };
+        });
+      },
+
+      moveToWishlist: (product: Product) => {
+        patchState(store, ({ cartItems, wishlistItems }) => {
+          const updatedCart = cartItems.filter((cartItem) => cartItem.product.id !== product.id);
+
+          const isAlreadyExists = wishlistItems.some((item) => item.id === product.id);
+
+          return {
+            cartItems: updatedCart,
+            wishlistItems: isAlreadyExists ? wishlistItems : [...wishlistItems, product],
+          };
+        });
+      },
+
+      removeFromCart: (product: Product) => {
+        patchState(store, ({ cartItems }) => ({
+          cartItems: cartItems.filter((cartItem) => cartItem.product.id !== product.id),
+        }));
+      },
+
+      proceedToCheckout: () => {
+        matDialog.open(SignInDialog, {
+          disableClose: true,
+          data: {
+            checkout: true,
+          },
+        });
+      },
+
+      signIn: async ({ email, password, checkout, dialogId }: SignInParams) => {
+        patchState(store, {
+          user: {
+            id: '1',
+            email,
+            name: 'John Doe',
+            imageUrl: 'https://randomuser.me/api/portraits/men/36.jpg',
+          },
+        });
+        matDialog.getDialogById(dialogId)?.close();
+        if (checkout) {
+          await router.navigate(['/checkout']);
         }
-        return {
-          cartItems: state.cartItems.map((item) => {
-            if (item.product.id === product.id) {
-              return { ...item, quantity: item.quantity + quantity };
-            }
-            return item;
-          }),
-        };
-      });
-
-      toaster.success(
-        existingItemIndex !== -1 ? 'Product added again to the cart' : 'Product added to the cart',
-      );
-    },
-
-    setItemQuantity: ({ productId, quantity }: { productId: string; quantity: number }) => {
-      const index = store.cartItems().findIndex((item) => item.product.id === productId);
-      const newCartItems = structuredClone(store.cartItems());
-      newCartItems[index].quantity = quantity;
-
-      patchState(store, () => {
-        return { cartItems: newCartItems };
-      });
-    },
-
-    addAllWishlistToCart: () => {
-      const newCartItems: CartItem[] = store
-        .wishlistItems()
-        .filter((wishlistItem) =>
-          store.cartItems().find((cartItem) => cartItem.product.id !== wishlistItem.id),
-        )
-        .map((newProduct) => ({ product: newProduct, quantity: 1 }));
-
-      patchState(store, ({ cartItems }) => {
-        const updateCartItems = [...cartItems, ...newCartItems];
-        return { cartItems: updateCartItems, wishlistItems: [] };
-      });
-    },
-
-    moveToWishlist: (product: Product) => {
-      patchState(store, ({ cartItems, wishlistItems }) => {
-        const updatedCart = cartItems.filter((cartItem) => cartItem.product.id !== product.id);
-
-        const isAlreadyExists = wishlistItems.some((item) => item.id === product.id);
-
-        return {
-          cartItems: updatedCart,
-          wishlistItems: isAlreadyExists ? wishlistItems : [...wishlistItems, product],
-        };
-      });
-    },
-
-    removeFromCart: (product: Product) => {
-      patchState(store, ({ cartItems }) => ({
-        cartItems: cartItems.filter((cartItem) => cartItem.product.id !== product.id),
-      }));
-    },
-  })),
+      },
+    }),
+  ),
 );
