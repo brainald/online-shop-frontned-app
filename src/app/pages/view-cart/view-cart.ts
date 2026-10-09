@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { BackButton } from '../../components/back-button/back-button';
 import { ListCartItems } from './list-cart-items/list-cart-items';
 import { TeaseWishlist } from './view-cart-tease-wishlist/view-cart-tease-wishlist';
+import { SummarizeOrder } from '../../components/summarize-order/summerize-order';
 
 @Component({
-  imports: [BackButton, ListCartItems, TeaseWishlist],
+  imports: [BackButton, ListCartItems, TeaseWishlist, SummarizeOrder],
   selector: 'app-view-cart',
   styles: ``,
   template: `
@@ -16,8 +17,8 @@ import { TeaseWishlist } from './view-cart-tease-wishlist/view-cart-tease-wishli
         <div class="lg:col-span-2">
           <app-list-cart-items />
         </div>
-        <div class="lg:col-span-2">
-          <app-list-cart-items />
+        <div>
+          <app-summarize-order />
         </div>
       </div>
     </div>
