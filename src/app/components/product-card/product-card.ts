@@ -17,6 +17,7 @@ import { RouterLink } from '@angular/router';
         class="w-full h-[300px] object-cover rounded-t-xl"
         [src]="product().imageUrl"
         [routerLink]="['/product', product().id]"
+        [style.view-transition-name]="'product-image-' + product().id"
       />
       <ng-content />
       <div class="p-5 flex flex-col flex-1" [routerLink]="['/product', product().id]">
@@ -32,7 +33,7 @@ import { RouterLink } from '@angular/router';
           <span class="text-2xl font-bold text-gray-900"> \${{ product().price }} </span>
           <button
             matButton="filled"
-            class="flex items-center gap-2"
+            class="flex items-center gap-2 z-11"
             (click)="addToCartClicked(product())"
           >
             <mat-icon>shopping_cart</mat-icon>
