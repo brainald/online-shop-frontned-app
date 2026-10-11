@@ -1,0 +1,52 @@
+import { Component, input } from '@angular/core';
+import { Review } from '../../../models/review';
+import { StarRating } from '../../../components/star-rating/star-rating';
+import { ViewPanel } from '../../../directives/view-panel';
+import { DatePipe } from '@angular/common';
+
+@Component({
+  imports: [StarRating, DatePipe, ViewPanel],
+  selector: 'app-view-review-item',
+  styles: ``,
+  template: `
+    <div appViewPanel>
+      <div class="flex items-start gap-4">
+        <!-- User Avatar -->
+        <img
+          [src]="review().userImageUrl"
+          [alt]="review().userName"
+          class="w-10 h-10 rounded-full object-cover"
+        />
+
+        <!-- Review Content -->
+        <div class="flex-1">
+          <!-- Username -->
+          <div class="text-lg font-semibold">
+            {{ review().userName }}
+          </div>
+
+          <!-- Rating + Date -->
+          <div class="flex items-center gap-2 mb-1">
+            <app-star-rating [rating]="review().rating"></app-star-rating>
+            <div class="text-sm text-gray-500">
+              {{ review().reviewDate | date: 'MMM d, yyyy' }}
+            </div>
+          </div>
+
+          <!-- Review Title -->
+          <div class="text-base font-semibold mb-1">
+            {{ review().title }}
+          </div>
+
+          <!-- Review Comment -->
+          <div class="text-sm text-gray-600">
+            {{ review().comment }}
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+})
+export class ViewReviewItem {
+  review = input.required<Review>();
+}

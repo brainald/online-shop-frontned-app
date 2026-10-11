@@ -16,6 +16,7 @@ import { SignInParams, SignUpParams, User } from './models/user';
 import { Router } from '@angular/router';
 import { Order } from './models/order';
 import { withStorageSync } from '@ngrx-toolkit/core';
+import { AddReviewParam, Review } from './models/review';
 
 export type EcommerceState = {
   products: Product[];
@@ -25,6 +26,7 @@ export type EcommerceState = {
   user: User | undefined;
   loading: boolean;
   selectedProductId: string | undefined;
+  writeReview: boolean;
 };
 
 export const EcommerceStore = signalStore(
@@ -1418,6 +1420,7 @@ export const EcommerceStore = signalStore(
     user: undefined,
     loading: false,
     selectedProductId: undefined,
+    writeReview: false,
   }),
   withStorageSync({
     key: 'ecommerce-store-v1',
@@ -1607,6 +1610,51 @@ export const EcommerceStore = signalStore(
         await new Promise((resolve) => setTimeout(resolve, 1000));
         patchState(store, { loading: false, cartItems: [] });
         await router.navigate(['order-success']);
+      },
+
+      showWriteReview: () => {
+        patchState(store, { writeReview: true });
+      },
+
+      hideWriteReview: () => {
+        patchState(store, { writeReview: false });
+      },
+
+      addReview: async ({ comment, rating, title }: AddReviewParam) => {
+        patchState(store, {
+          loading: true,
+        });
+        const product = store.products().find((p) => p.id === store.selectedProductId());
+        if (!product) {
+          patchState(store, { loading: false });
+          return;
+        }
+
+        const review: Review = {
+          id: crypto.randomUUID(),
+          title,
+          comment,
+          rating,
+          productId: product.id,
+          userName: store.user()?.name || '',
+          userImageUrl: store.user()?.imageUrl || '',
+          reviewDate: new Date(),
+        };
+
+        const copyProducts = structuredClone(store.products());
+        const index = copyProducts.findIndex((p) => p.id === product.id);
+        copyProducts[index].reviews.push(review);
+        copyProducts[index].rating =
+          Math.round(
+            (copyProducts[index].reviews.reduce((acc, r) => acc + r.rating, 0) /
+              copyProducts[index].reviews.length) *
+              10,
+          ) / 10;
+        copyProducts[index].reviewCount = copyProducts[index].reviews.length;
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        patchState(store, { products: copyProducts, loading: false, writeReview: false });
       },
     }),
   ),

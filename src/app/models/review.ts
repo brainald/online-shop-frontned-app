@@ -8,3 +8,5 @@ export type Review = {
   comment: string;
   reviewDate: Date;
 };
+
+export type AddReviewParam = Pick<Review, 'title' | 'comment' | 'rating'>;
