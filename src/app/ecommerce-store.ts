@@ -15,7 +15,7 @@ import { SignInDialog } from './components/sign-in-dialog/sign-in-dialog';
 import { SignInParams, SignUpParams, User } from './models/user';
 import { Router } from '@angular/router';
 import { Order } from './models/order';
-import { withStorageSync } from '@ngrx-toolkit/core';
+import { withLocalStorage, withStorageSync } from '@ngrx-toolkit/core';
 import { AddReviewParam, Review } from './models/review';
 
 export type EcommerceState = {
@@ -1425,7 +1425,7 @@ export const EcommerceStore = signalStore(
   withStorageSync({
     key: 'ecommerce-store-v1',
     select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }),
-  }),
+  }, withLocalStorage()),
   withComputed(({ category, products, wishlistItems, cartItems, selectedProductId }) => ({
     filteredProducts: computed(() => {
       if (category().toLowerCase() === 'all') return products();
