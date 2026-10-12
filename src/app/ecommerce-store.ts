@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { Order } from './models/order';
 import { withLocalStorage, withStorageSync } from '@ngrx-toolkit/core';
 import { AddReviewParam, Review } from './models/review';
+import { SeoManager } from './services/seo-manager';
 
 export type EcommerceState = {
   products: Product[];
@@ -1422,10 +1423,13 @@ export const EcommerceStore = signalStore(
     selectedProductId: undefined,
     writeReview: false,
   }),
-  withStorageSync({
-    key: 'ecommerce-store-v1',
-    select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }),
-  }, withLocalStorage()),
+  withStorageSync(
+    {
+      key: 'ecommerce-store-v1',
+      select: ({ wishlistItems, cartItems, user }) => ({ wishlistItems, cartItems, user }),
+    },
+    withLocalStorage(),
+  ),
   withComputed(({ category, products, wishlistItems, cartItems, selectedProductId }) => ({
     filteredProducts: computed(() => {
       if (category().toLowerCase() === 'all') return products();
@@ -1441,13 +1445,43 @@ export const EcommerceStore = signalStore(
     ),
   })),
   withMethods(
-    (store, toaster = inject(Toaster), matDialog = inject(MatDialog), router = inject(Router)) => ({
+    (
+      store,
+      toaster = inject(Toaster),
+      matDialog = inject(MatDialog),
+      router = inject(Router),
+      seoManager = inject(SeoManager),
+    ) => ({
       setCategory: signalMethod<string>((category: string) => {
         patchState(store, { category });
       }),
 
       setProductId: signalMethod<string>((productId: string) => {
         patchState(store, { selectedProductId: productId });
+      }),
+
+      setProductsListSeoTags: signalMethod<string | undefined>((category) => {
+        const categoryName = category
+          ? category.charAt(0).toUpperCase() + category.slice(1)
+          : 'All Products';
+        const description = category
+          ? `Browse our collection of ${category} products`
+          : `Browse our collection of products`;
+        seoManager.updateSeoTags({
+          title: categoryName,
+          description,
+        });
+      }),
+
+      setProductSeoTags: signalMethod<Product | undefined>((product) => {
+        if (!product) return;
+
+        seoManager.updateSeoTags({
+          title: product.name,
+          description: product.description,
+          image: product.imageUrl,
+          type: 'product',
+        });
       }),
 
       addToWishlist: (product: Product) => {

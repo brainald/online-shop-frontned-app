@@ -36,6 +36,7 @@ export default class ViewProductDetail {
 
   constructor() {
     this.store.setProductId(this.productId);
+    this.store.setProductSeoTags(this.store.selectedProduct);
   }
 
   backRoute = computed(() => `/products/${this.store.category()}`);

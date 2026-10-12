@@ -1,3 +1,4 @@
+import { SeoManager } from './../../services/seo-manager';
 import { EmptyWishlist } from './empty-wishlist/empty-wishlist';
 import { Component, inject } from '@angular/core';
 import { BackButton } from '../../components/back-button/back-button';
@@ -45,4 +46,12 @@ import { MatIconButton, MatAnchor, MatButton } from '@angular/material/button';
 })
 export default class MyWishlist {
   store = inject(EcommerceStore);
+  seoManager = inject(SeoManager);
+
+  constructor() {
+    this.seoManager.updateSeoTags({
+      description: 'View your wishlist items',
+      title: 'My Wishlist',
+    });
+  }
 }
